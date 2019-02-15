@@ -1,0 +1,152 @@
+heat_template_version: ocata
+description: >
+  A simple Heat template that creates an instance with a network and a subnet,
+  and verifies that instance can ping back to Heat API via WaitCondition.
+parameters:
+  image:
+    type: string
+    description: Glance image name or UUID
+    default: ubuntu-16-04-amd64-20180222
+  stack_name:
+    type: string
+  flavor:
+    type: string
+    default: dev.ctl
+    description: Nova flavor name or ID
+  extnet:
+    type: string
+    default: public
+    description: >
+      Name or ID of the public network in Neutron.
+      Needed for instances to have access to public cloud API
+      when Neutron backend is OVS.
+  public_key:
+    type: string
+    default: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCp0evjOaK8c8SKYK4r2+0BN7g+8YSvQ2n8nFgOURCyvkJqOHi1qPGZmuN0CclYVdVuZiXbWw3VxRbSW3EH736VzgY1U0JmoTiSamzLHaWsXvEIW8VCi7boli539QJP0ikJiBaNAgZILyCrVPN+A6mfqtacs1KXdZ0zlMq1BPtFciR1JTCRcVs5vP2Wwz5QtY2jMIh3aiwkePjMTQPcfmh1TkOlxYu5IbQyZ3G1ahA0mNKI9a0dtF282av/F6pwB/N1R1nEZ/9VtcN2I1mf1NW/tTHEEcTzXYo1R/8K9vlqAN8QvvGLZtZduGviNVNoNWvoxaXxDt8CPv2B2NCdQFZp'
+  dns_servers:
+    type: comma_delimited_list
+    default: "172.18.224.6"
+
+
+resources:
+  key_pair:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_param: stack_name }
+      public_key: { get_param: public_key }
+      save_private_key: false
+
+  network:
+    type: OS::Neutron::Net
+    properties:
+      port_security_enabled: false
+  subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network: { get_resource: network }
+      cidr: 192.168.10.0/24
+      dns_nameservers: { get_param: dns_servers }
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: extnet }
+  router_iface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: router }
+      subnet: { get_resource: subnet }
+  floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: extnet }
+  port:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_resource: network }
+      fixed_ips:
+        - subnet: {get_resource: subnet}
+
+  handle:
+    type: OS::Heat::WaitConditionHandle
+    depends_on: router_iface
+
+  waiter:
+    type: OS::Heat::WaitCondition
+    depends_on: server
+    properties:
+      timeout: 600
+      handle: { get_resource: handle }
+
+  server:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_resource: key_pair }
+      networks:
+        - port: {get_resource: port}
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash
+            cat <<EOF > /usr/sbin/wait_condition_send.sh
+            #!/bin/bash
+            function wait_condition_send() {
+              local status=\${1:-SUCCESS}
+              local reason=\${2:-empty}
+              local data_binary="{\"status\": \"$status\", \"reason\": \"$reason\"}"
+              echo "Sending signal to wait condition: $data_binary"
+
+              res=''
+              j=0
+              while [[ \${j} -lt 3 ]] && [[ ! \${res} =~ '0' ]]; do
+                  $wait_condition_notify -k --connect-timeout 5 --max-time 15 -k --data-binary "$data_binary"
+                  res=\$?
+                  sleep 3
+              j=\$((\$j+1))
+              done;
+              if [ "$status" == "FAILURE" ]; then
+                exit 1
+              fi
+            }
+
+            wait_condition_send "SUCCESS" "Instance successfuly started."
+
+            EOF
+            chmod +x /usr/sbin/wait_condition_send.sh
+
+            cat <<EOF > /etc/systemd/system/wait-condition-send.service
+            [Unit]
+            Description=Send call-back to heat
+            After=networking.service
+            [Service]
+            Type=oneshot
+            ExecStart=/usr/sbin/wait_condition_send.sh
+            RemainAfterExit=true
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            systemctl daemon-reload
+            systemctl enable wait-condition-send.service
+
+            export DEBIAN_FRONTEND=noninteractive
+            apt update && apt -y dist-upgrade
+
+            sync
+            reboot
+          params:
+            $wait_condition_notify: { get_attr: [ handle, curl_cli ] }
+
+  server_floating_ip_assoc:
+    depends_on: server
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: {get_resource: floating_ip}
+      port_id: {get_resource: port}
+
+outputs:
+  floating_ip:
+    value: { get_attr: [floating_ip, floating_ip_address ] }
