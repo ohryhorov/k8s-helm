@@ -10,3 +10,14 @@ cd ./openstack-helm && ./tools/deployment/developer/common/010-deploy-k8s.sh
 ./tools/deployment/developer/common/020-setup-client.sh
 
 ./tools/deployment/developer/common/030-ingress.sh
+
+./tools/deployment/developer/nfs/040-nfs-provisioner.sh
+
+./tools/deployment/developer/common/050-mariadb.sh
+
+./tools/deployment/developer/nfs/060-rabbitmq.sh
+
+./tools/deployment/developer/nfs/070-memcached.sh
+
+./tools/deployment/developer/nfs/080-keystone.sh
+
