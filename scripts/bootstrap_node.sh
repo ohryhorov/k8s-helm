@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xv
 
 REPO_URL="https://github.com/ohryhorov/k8s-helm"
 REPO_DIR="/srv/k8s-helm"
