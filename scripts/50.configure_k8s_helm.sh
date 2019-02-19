@@ -4,9 +4,8 @@
 
 kubeadm init --pod-network-cidr=10.20.0.0/16
 
-mkdir -p $HOME/.kube
-cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
-chown $(id -u):$(id -g) $HOME/.kube/config
+mkdir -p /root/.kube
+cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
 kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
 
