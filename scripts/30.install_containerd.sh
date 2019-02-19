@@ -1,3 +1,5 @@
+apt-get install -y libseccomp2
+
 # Export required environment variables.
 export CONTAINERD_VERSION="1.1.2"
 export CONTAINERD_SHA256="d4ed54891e90a5d1a45e3e96464e2e8a4770cd380c21285ef5c9895c40549218"

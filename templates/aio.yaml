@@ -13,6 +13,9 @@ parameters:
     type: string
     default: dev.ctl
     description: Nova flavor name or ID
+  server_name:
+    type: string
+    default: k8s-helm-aio
   extnet:
     type: string
     default: public
@@ -26,7 +29,9 @@ parameters:
   dns_servers:
     type: comma_delimited_list
     default: "172.18.224.6"
-
+  userparam:
+    type: string
+    default: SomeMoreData
 
 resources:
   key_pair:
@@ -66,6 +71,89 @@ resources:
       network: {get_resource: network }
       fixed_ips:
         - subnet: {get_resource: subnet}
+  server:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      name: { get_param: server_name }
+      key_name: { get_resource: key_pair }
+      networks:
+        - port: {get_resource: port}
+      user_data_format: RAW
+      user_data: { get_resource: server_config }
+
+  server_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        write_files:
+        - path: /etc/check.conf
+          owner: root:root
+          permissions: '0644'
+          content:
+            str_replace:
+              template: |
+                [DEFAULT]
+                param = $USERPARAM
+              params:
+                $USERPARAM: { get_param: userparam }
+        runcmd:
+          - str_replace:
+              template: |
+                cat <<EOF > /usr/sbin/wait_condition_send.sh
+                #!/bin/bash
+                function wait_condition_send() {
+                  local status=\${1:-SUCCESS}
+                  local reason=\${2:-empty}
+                  local data_binary="{\"status\": \"$status\", \"reason\": \"$reason\"}"
+                  echo "Sending signal to wait condition: $data_binary"
+
+                  res=''
+                  j=0
+                  while [[ \${j} -lt 3 ]] && [[ ! \${res} =~ '0' ]]; do
+                      $wait_condition_notify -k --connect-timeout 5 --max-time 15 -k --data-binary "$data_binary"
+                      res=\$?
+                      sleep 3
+                  j=\$((\$j+1))
+                  done;
+                  if [ "$status" == "FAILURE" ]; then
+                    exit 1
+                  fi
+                }
+
+                wait_condition_send "SUCCESS" "Instance successfuly started."
+
+                EOF
+                chmod +x /usr/sbin/wait_condition_send.sh
+
+                cat <<EOF > /etc/systemd/system/wait-condition-send.service
+                [Unit]
+                Description=Send call-back to heat
+                After=networking.service
+                [Service]
+                Type=oneshot
+                ExecStart=/usr/sbin/wait_condition_send.sh
+                RemainAfterExit=true
+
+                [Install]
+                WantedBy=multi-user.target
+                EOF
+
+                echo "$port_ip_address $server_instance_name" >> /etc/hosts
+                systemctl daemon-reload
+                systemctl enable wait-condition-send.service
+
+                export DEBIAN_FRONTEND=noninteractive
+                apt update && apt -y dist-upgrade
+
+                curl -qL https://raw.githubusercontent.com/ohryhorov/k8s-helm/master/scripts/bootstrap_node.sh | sh
+
+                sync
+              params:
+                $wait_condition_notify: { get_attr: [ handle, curl_cli ] }
+                $port_ip_address: { get_attr: [ port, fixed_ips, 0, ip_address ] }
+                $server_instance_name: { get_param: server_name }
 
   handle:
     type: OS::Heat::WaitConditionHandle
@@ -77,70 +165,6 @@ resources:
     properties:
       timeout: 600
       handle: { get_resource: handle }
-
-  server:
-    type: OS::Nova::Server
-    properties:
-      image: { get_param: image }
-      flavor: { get_param: flavor }
-      key_name: { get_resource: key_pair }
-      networks:
-        - port: {get_resource: port}
-      user_data_format: RAW
-      user_data:
-        str_replace:
-          template: |
-            #!/bin/bash
-            cat <<EOF > /usr/sbin/wait_condition_send.sh
-            #!/bin/bash
-            function wait_condition_send() {
-              local status=\${1:-SUCCESS}
-              local reason=\${2:-empty}
-              local data_binary="{\"status\": \"$status\", \"reason\": \"$reason\"}"
-              echo "Sending signal to wait condition: $data_binary"
-
-              res=''
-              j=0
-              while [[ \${j} -lt 3 ]] && [[ ! \${res} =~ '0' ]]; do
-                  $wait_condition_notify -k --connect-timeout 5 --max-time 15 -k --data-binary "$data_binary"
-                  res=\$?
-                  sleep 3
-              j=\$((\$j+1))
-              done;
-              if [ "$status" == "FAILURE" ]; then
-                exit 1
-              fi
-            }
-
-            wait_condition_send "SUCCESS" "Instance successfuly started."
-
-            EOF
-            chmod +x /usr/sbin/wait_condition_send.sh
-
-            cat <<EOF > /etc/systemd/system/wait-condition-send.service
-            [Unit]
-            Description=Send call-back to heat
-            After=networking.service
-            [Service]
-            Type=oneshot
-            ExecStart=/usr/sbin/wait_condition_send.sh
-            RemainAfterExit=true
-
-            [Install]
-            WantedBy=multi-user.target
-            EOF
-            systemctl daemon-reload
-            systemctl enable wait-condition-send.service
-
-            export DEBIAN_FRONTEND=noninteractive
-            apt update && apt -y dist-upgrade
-
-            curl -qL https://raw.githubusercontent.com/ohryhorov/k8s-helm/master/scripts/bootstrap_node.sh | sh
-
-            sync
-            reboot
-          params:
-            $wait_condition_notify: { get_attr: [ handle, curl_cli ] }
 
   server_floating_ip_assoc:
     depends_on: server
