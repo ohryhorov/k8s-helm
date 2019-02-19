@@ -147,7 +147,7 @@ resources:
                 export DEBIAN_FRONTEND=noninteractive
                 apt update && apt -y dist-upgrade
 
-                curl -qL https://raw.githubusercontent.com/ohryhorov/k8s-helm/master/scripts/bootstrap_node.sh | sh
+                curl -qL https://raw.githubusercontent.com/ohryhorov/k8s-helm/master/scripts/bootstrap_node.sh | bash --
 
                 sync
               params:
