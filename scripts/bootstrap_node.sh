@@ -18,3 +18,5 @@ ${SCRIPTS_DIR}/20.install_cri-o.sh
 ${SCRIPTS_DIR}/30.install_containerd.sh
 
 ${SCRIPTS_DIR}/40.install_kubeadm.sh
+
+${SCRIPTS_DIR}/50.configure_k8s_helm.sh
