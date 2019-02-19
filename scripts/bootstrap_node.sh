@@ -7,6 +7,8 @@ cd ${REPO_DIR}
 
 SCRIPTS_DIR="${REPO_DIR}/scripts"
 
+chmod +x ${SCRIPTS_DIR}/* -R
+
 ${SCRIPTS_DIR}/0.install_k8s_prereq.sh
 
 ${SCRIPTS_DIR}/10.install_docker_ce.sh
