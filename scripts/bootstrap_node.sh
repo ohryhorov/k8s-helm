@@ -19,4 +19,8 @@ ${SCRIPTS_DIR}/30.install_containerd.sh
 
 ${SCRIPTS_DIR}/40.install_kubeadm.sh
 
-${SCRIPTS_DIR}/50.configure_k8s_helm.sh
+${SCRIPTS_DIR}/50.init_k8s.sh
+
+sleep 20
+
+${SCRIPTS_DIR}/60.configure_helm.sh
