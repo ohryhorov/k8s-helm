@@ -26,8 +26,8 @@ kubectl taint nodes --all node-role.kubernetes.io/master- --kubeconfig /root/.ku
 
 wget https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz && tar zxvf helm-v2.12.3-linux-amd64.tar.gz && mv ./linux-amd64/helm /usr/bin
 
-echo ${HOME}
-
 kubectl create serviceaccount -n kube-system tiller --kubeconfig /root/.kube/config
 kubectl create clusterrolebinding tiller-binding --clusterrole=cluster-admin --serviceaccount kube-system:tiller --kubeconfig /root/.kube/config
 helm init --service-account tiller
+
+kubectl get pods --all-namespaces
