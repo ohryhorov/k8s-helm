@@ -6,6 +6,7 @@ git clone ${REPO_URL} ${REPO_DIR}
 cd ${REPO_DIR}
 
 SCRIPTS_DIR="${REPO_DIR}/scripts"
+export HOME=/root/
 
 chmod +x ${SCRIPTS_DIR}/* -R
 
@@ -19,8 +20,5 @@ ${SCRIPTS_DIR}/30.install_containerd.sh
 
 ${SCRIPTS_DIR}/40.install_kubeadm.sh
 
-${SCRIPTS_DIR}/50.init_k8s.sh
+${SCRIPTS_DIR}/50.init_k8s_helm.sh
 
-sleep 20
-
-${SCRIPTS_DIR}/60.configure_helm.sh
