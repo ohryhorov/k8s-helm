@@ -11,3 +11,4 @@ date
 mkdir -p /root/.kube
 cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
+kubectl get pods --all-namespaces --kubeconfig /root/.kube/config
