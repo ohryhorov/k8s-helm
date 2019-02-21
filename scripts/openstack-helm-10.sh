@@ -1,6 +1,8 @@
 #!/bin/bash
 set -xe
 
+cd /usr/src
+
 git clone https://git.openstack.org/openstack/openstack-helm-infra.git
 git clone https://git.openstack.org/openstack/openstack-helm.git
 
