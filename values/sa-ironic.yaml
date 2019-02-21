@@ -1,0 +1,419 @@
+conf:
+  ironic:
+#    glance:
+#      swift_api_version: v1
+#    glance:
+#      auth_type: password
+#      swift_temp_url_duration: 86400
+#      temp_url_endpoint_type: swift
+#      swift_container: glance
+#      swift_api_version: v1
+#      auth_section: glance
+    inspector:
+      auth_type: password
+    keystone_authtoken:
+      auth_type: noauth
+    neutron:
+      auth_type: noauth
+    pxe:
+      pxe_append_params: "nofb nomodeset vga=normal ipa-debug=1"
+      images_path: /var/lib/openstack-helm/ironic/images
+      instance_master_path: /var/lib/openstack-helm/ironic/master_images
+      pxe_config_template: $pybasedir/drivers/modules/ipxe_config.template
+      uefi_pxe_config_template: $pybasedir/drivers/modules/ipxe_config.template
+      tftp_root: /var/lib/openstack-helm/tftpboot
+      tftp_master_path: /var/lib/openstack-helm/tftpboot/master_images
+      pxe_bootfile_name: undionly.kpxe
+      uefi_pxe_bootfile_name: ipxe.efi
+      ipxe_enabled: true
+    service_catalog:
+      auth_type: noauth
+    swift:
+      auth_url: null
+  logging:
+    loggers:
+      keys:
+        - root
+        - ironic
+    handlers:
+      keys:
+        - stdout
+        - stderr
+        - "null"
+    formatters:
+      keys:
+        - context
+        - default
+    logger_root:
+      level: WARNING
+      handlers: 'null'
+    logger_ironic:
+      level: INFO
+      handlers:
+        - stdout
+      qualname: ironic
+    logger_amqp:
+      level: WARNING
+      handlers: stderr
+      qualname: amqp
+    logger_amqplib:
+      level: WARNING
+      handlers: stderr
+      qualname: amqplib
+    logger_eventletwsgi:
+      level: WARNING
+      handlers: stderr
+      qualname: eventlet.wsgi.server
+    logger_sqlalchemy:
+      level: WARNING
+      handlers: stderr
+      qualname: sqlalchemy
+    logger_boto:
+      level: WARNING
+      handlers: stderr
+      qualname: boto
+    handler_null:
+      class: logging.NullHandler
+      formatter: default
+      args: ()
+    handler_stdout:
+      class: StreamHandler
+      args: (sys.stdout,)
+      formatter: context
+    handler_stderr:
+      class: StreamHandler
+      args: (sys.stderr,)
+      formatter: context
+    formatter_context:
+      class: oslo_log.formatters.ContextFormatter
+    formatter_default:
+      format: "%(message)s"
+
+network:
+  pxe:
+    device: ens3
+#    neutron_network_name: baremetal
+#    neutron_subnet_name: baremetal
+#    neutron_provider_network: ironic
+#    neutron_subnet_gateway: 172.24.6.1/24
+#    neutron_subnet_cidr: 172.24.6.0/24
+#    neutron_subnet_alloc_start: 172.24.6.100
+#    neutron_subnet_alloc_end: 172.24.6.200
+#    neutron_subnet_dns_nameserver: 10.96.0.10
+  api:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    node_port:
+      enabled: false
+      port: 30511
+
+bootstrap:
+  enabled: false
+  ks_user: ironic
+
+dependencies:
+  dynamic:
+    common:
+      local_image_registry: null
+  static:
+    api:
+      jobs:
+#        - ironic-db-sync
+#        - ironic-ks-user
+##        - ironic-ks-endpoints
+        - ironic-rabbit-init
+      services:
+        - endpoint: internal
+          service: oslo_db
+#        - endpoint: internal
+#          service: identity
+        - endpoint: internal
+          service: oslo_messaging
+    bootstrap:
+      jobs: null
+      services: null
+    conductor:
+      jobs:
+#        - ironic-db-sync
+#        - ironic-ks-user
+##        - ironic-ks-endpoints
+        - ironic-rabbit-init
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: oslo_messaging
+    db_drop:
+      services:
+        - endpoint: internal
+          service: oslo_db
+    db_init:
+      services:
+        - endpoint: internal
+          service: oslo_db
+    db_sync:
+      jobs:
+        - ironic-db-init
+      services:
+        - endpoint: internal
+          service: oslo_db
+#    ks_endpoints: null
+#      jobs:
+#        - ironic-ks-service
+#      services:
+#        - endpoint: internal
+#          service: identity
+    ks_service:
+      services:
+        - endpoint: internal
+          service: identity
+    ks_user:
+      services:
+        - endpoint: internal
+          service: identity
+    rabbit_init:
+      services:
+      - endpoint: internal
+        service: oslo_messaging
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: ironic-keystone-admin
+    ironic: ironic-keystone-admin
+    glance: ironic-keystone-admin
+  oslo_db:
+    admin: ironic-db-admin
+    ironic: ironic-db-user
+  oslo_messaging:
+    admin: ironic-rabbitmq-admin
+    ironic: ironic-rabbitmq-user
+
+# typically overridden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  cluster_domain_suffix: cluster.local
+  local_image_registry:
+    name: docker-registry
+    namespace: docker-registry
+    hosts:
+      default: localhost
+      internal: docker-registry
+      node: localhost
+    host_fqdn_override:
+      default: null
+    port:
+      registry:
+        node: 5000
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: password
+      ironic:
+        username: ironic
+        password: password
+    hosts:
+      default: mariadb
+    host_fqdn_override:
+      default: null
+    path: /ironic
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  oslo_cache:
+    auth:
+      # NOTE(portdirect): this is used to define the value for keystone
+      # authtoken cache encryption key, if not set it will be populated
+      # automatically with a random value, but to take advantage of
+      # this feature all services should be set to use the same key,
+      # and memcache service.
+      memcache_secret_key: null
+    hosts:
+      default: memcached
+    host_fqdn_override:
+      default: null
+    port:
+      memcache:
+        default: 11211
+  oslo_messaging:
+    auth:
+      admin:
+        username: rabbitmq
+        password: password
+      ironic:
+        username: ironic
+        password: password
+    hosts:
+      default: rabbitmq
+    host_fqdn_override:
+      default: null
+    path: /ironic
+    scheme: rabbit
+    port:
+      amqp:
+        default: 5672
+      http:
+        default: 15672
+  object_store:
+    name: swift
+    namespace: ceph
+    auth:
+      glance:
+        tmpurlkey: supersecret
+    hosts:
+      default: ceph-rgw
+    host_fqdn_override:
+      default: null
+    path:
+      default: /swift/v1/KEY_$(tenant_id)s
+    scheme:
+      default: http
+    port:
+      api:
+        default: 8088
+  fluentd:
+    namespace: null
+    name: fluentd
+    hosts:
+      default: fluentd-logging
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme: 'http'
+    port:
+      service:
+        default: 24224
+      metrics:
+        default: 24220
+
+pod:
+  affinity:
+    anti:
+      type:
+        default: preferredDuringSchedulingIgnoredDuringExecution
+      topologyKey:
+        default: kubernetes.io/hostname
+  mounts:
+    ironic_api:
+      init_container: null
+      ironic_api:
+    ironic_conductor:
+      init_container: null
+      ironic_conductor:
+    ironic_bootstrap:
+      init_container: null
+      ironic_bootstrap:
+  replicas:
+    api: 1
+    conductor: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    conductor:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_drop:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      rabbit_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+network_policy:
+  ironic:
+    ingress:
+      - {}
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  ingress_api: true
+  job_bootstrap: true
+  job_db_drop: false
+  job_db_init: true
+  job_db_sync: true
+  job_image_repo_sync: false
+  job_ks_endpoints: false
+  job_ks_service: true
+  job_ks_user: true
+  job_manage_cleaning_network: false
+  job_rabbit_init: true
+  pdb_api: true
+  network_policy: false
+  secret_db: true
+  secret_keystone: true
+  secret_rabbitmq: true
+  service_api: true
+  service_ingress_api: true
+  statefulset_conductor: true
