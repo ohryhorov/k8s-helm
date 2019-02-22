@@ -7,7 +7,9 @@ git clone https://git.openstack.org/openstack/openstack-helm-infra.git
 git clone https://git.openstack.org/openstack/openstack-helm.git
 
 apt install build-essential -y
-cd ./openstack-helm && ./tools/deployment/developer/common/010-deploy-k8s.sh
+cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-helm refs/changes/15/636715/3 && git checkout FETCH_HEAD
+
+./tools/deployment/developer/common/010-deploy-k8s.sh
 
 ./tools/deployment/developer/common/020-setup-client.sh
 
@@ -19,7 +21,9 @@ cd ./openstack-helm && ./tools/deployment/developer/common/010-deploy-k8s.sh
 
 ./tools/deployment/developer/nfs/060-rabbitmq.sh
 
-./tools/deployment/developer/nfs/070-memcached.sh
+#./tools/deployment/developer/nfs/070-memcached.sh
 
-./tools/deployment/developer/nfs/080-keystone.sh
+#./tools/deployment/developer/nfs/080-keystone.sh
+
+make all && helm upgrade --install ironic /usr/src/openstack-helm/ironic --namespace=openstack --values=/srv/k8s-helm/values/sa-ironic.yaml --set pod.replicas.server=1
 

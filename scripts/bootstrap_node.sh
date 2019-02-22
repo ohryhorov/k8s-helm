@@ -22,3 +22,5 @@ ${SCRIPTS_DIR}/40.install_kubeadm.sh
 
 ${SCRIPTS_DIR}/50.init_k8s_helm.sh
 
+${SCRIPTS_DIR}/openstack-helm-10.sh
+
