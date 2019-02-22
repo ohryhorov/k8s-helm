@@ -1,20 +1,13 @@
 conf:
   ironic:
-#    glance:
-#      swift_api_version: v1
-#    glance:
-#      auth_type: password
-#      swift_temp_url_duration: 86400
-#      temp_url_endpoint_type: swift
-#      swift_container: glance
-#      swift_api_version: v1
-#      auth_section: glance
+    DEFAULT:
+      auth_strategy: noauth
     inspector:
       auth_type: password
     keystone_authtoken:
-      auth_type: noauth
+      auth_type: password
     neutron:
-      auth_type: noauth
+      auth_type: password
     pxe:
       pxe_append_params: "nofb nomodeset vga=normal ipa-debug=1"
       images_path: /var/lib/openstack-helm/ironic/images
@@ -27,7 +20,7 @@ conf:
       uefi_pxe_bootfile_name: ipxe.efi
       ipxe_enabled: true
     service_catalog:
-      auth_type: noauth
+      auth_type: password
     swift:
       auth_url: null
   logging:
@@ -113,8 +106,18 @@ network:
       port: 30511
 
 bootstrap:
-  enabled: false
-  ks_user: ironic
+  image:
+    enabled: false
+    openstack:
+      enabled: false
+  network:
+    enabled: false
+    openstack:
+      enabled: false
+  object_store:
+    enabled: false
+    openstack:
+      enabled: false
 
 dependencies:
   dynamic:
@@ -168,14 +171,14 @@ dependencies:
 #      services:
 #        - endpoint: internal
 #          service: identity
-    ks_service:
-      services:
-        - endpoint: internal
-          service: identity
-    ks_user:
-      services:
-        - endpoint: internal
-          service: identity
+#    ks_service:
+#      services:
+#        - endpoint: internal
+#          service: identity
+#    ks_user:
+#      services:
+#        - endpoint: internal
+#          service: identity
     rabbit_init:
       services:
       - endpoint: internal
@@ -186,7 +189,7 @@ secrets:
   identity:
     admin: ironic-keystone-admin
     ironic: ironic-keystone-admin
-    glance: ironic-keystone-admin
+#    glance: ironic-keystone-admin
   oslo_db:
     admin: ironic-db-admin
     ironic: ironic-db-user
@@ -405,14 +408,14 @@ manifests:
   job_db_sync: true
   job_image_repo_sync: false
   job_ks_endpoints: false
-  job_ks_service: true
-  job_ks_user: true
+  job_ks_service: false
+  job_ks_user: false
   job_manage_cleaning_network: false
   job_rabbit_init: true
   pdb_api: true
   network_policy: false
   secret_db: true
-  secret_keystone: true
+  secret_keystone: false
   secret_rabbitmq: true
   service_api: true
   service_ingress_api: true
