@@ -9,7 +9,7 @@ parameters:
     default: ubuntu-16-04-amd64-20180222
   stack_name:
     type: string
-    default: 'k8s-helm-aio'
+#    default: 'k8s-helm-aio'
   flavor:
     type: string
     default: dev.ctl
