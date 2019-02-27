@@ -32,6 +32,20 @@ parameters:
   userparam:
     type: string
     default: SomeMoreData
+  cfg_reclass_address:
+    type: string
+    default: https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-aio
+  cfg_reclass_branch:
+    type: string
+    default: stable/ocata
+  cluster_zone:
+    type: string
+    default: nova
+  cluster_node_count:
+    type: string
+    default: 1
+
+
 
 resources:
   key_pair:
