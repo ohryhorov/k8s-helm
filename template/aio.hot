@@ -194,5 +194,7 @@ resources:
       port_id: {get_resource: port}
 
 outputs:
+  salt_master_ip:
+    value: { get_attr: [floating_ip, floating_ip_address ] }
   floating_ip:
     value: { get_attr: [floating_ip, floating_ip_address ] }
