@@ -9,6 +9,7 @@ parameters:
     default: ubuntu-16-04-amd64-20180222
   stack_name:
     type: string
+    default: 'k8s-helm-aio'
   flavor:
     type: string
     default: dev.ctl
@@ -44,8 +45,12 @@ parameters:
   cluster_node_count:
     type: string
     default: 1
-
-
+  cfg_saltversion:
+    type: string
+    default: 'stable 2017.7'
+  cluster_public_net:
+    type: string
+    description: ID or name of public network
 
 resources:
   key_pair:
@@ -157,6 +162,7 @@ resources:
                 echo "$port_ip_address $server_instance_name" >> /etc/hosts
                 systemctl daemon-reload
                 systemctl enable wait-condition-send.service
+                systemctl start wait-condition-send.service
 
                 export DEBIAN_FRONTEND=noninteractive
                 apt update && apt -y dist-upgrade
@@ -177,7 +183,7 @@ resources:
     type: OS::Heat::WaitCondition
     depends_on: server
     properties:
-      timeout: 600
+      timeout: 1200
       handle: { get_resource: handle }
 
   server_floating_ip_assoc:
