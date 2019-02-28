@@ -70,6 +70,15 @@ resources:
       network: { get_resource: network }
       cidr: 192.168.10.0/24
       dns_nameservers: { get_param: dns_servers }
+  br_network:
+    type: OS::Neutron::Net
+    properties:
+      port_security_enabled: false
+  br_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network: { get_resource: br_network }
+      cidr: 192.168.90.0/24
   router:
     type: OS::Neutron::Router
     properties:
@@ -90,6 +99,12 @@ resources:
       network: {get_resource: network }
       fixed_ips:
         - subnet: {get_resource: subnet}
+  br_port:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_resource: br_network }
+      fixed_ips:
+        - subnet: {get_resource: br_subnet}
   server:
     type: OS::Nova::Server
     properties:
@@ -99,6 +114,7 @@ resources:
       key_name: { get_resource: key_pair }
       networks:
         - port: {get_resource: port}
+        - port: {get_resource: br_port}
       user_data_format: RAW
       user_data: { get_resource: server_config }
 
