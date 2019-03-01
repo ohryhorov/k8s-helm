@@ -23,6 +23,8 @@ conf:
       auth_type: password
     swift:
       auth_url: null
+    dhcp:
+      dhcp_provider: none
   logging:
     loggers:
       keys:

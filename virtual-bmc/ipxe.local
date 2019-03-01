@@ -1,0 +1,18 @@
+#!ipxe
+
+goto deploy
+
+:deploy
+imgfree
+kernel http://192.168.10.7:8080/deploy_kernel selinux=0 troubleshoot=0 text nofb nomodeset vga=normal ipa-insecure=1 ip=${ip}:${next-server}:${gateway}:${netmask} BOOTIF=${mac} ipa-api-url=http://192.168.38.158:6385 initrd=deploy_ramdisk coreos.configdrive=0 || goto deploy
+
+initrd http://192.168.10.7:8080/deploy_ramdisk || goto deploy
+boot
+
+:boot_partition
+imgfree
+kernel no_kernel root={{ ROOT }} ro text nofb nomodeset vga=normal ipa-insecure=1 initrd=ramdisk || goto boot_partition
+initrd no_ramdisk || goto boot_partition
+boot
+
+:boot_whole_disk
