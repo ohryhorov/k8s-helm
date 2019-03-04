@@ -8,6 +8,8 @@ conf:
       auth_type: password
     neutron:
       auth_type: password
+    conductor:
+      automated_clean: false
     pxe:
       pxe_append_params: "nofb nomodeset vga=normal ipa-debug=1"
       images_path: /var/lib/openstack-helm/ironic/images
