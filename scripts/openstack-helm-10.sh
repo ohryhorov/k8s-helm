@@ -27,3 +27,5 @@ cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-h
 
 make all && helm upgrade --install ironic /usr/src/openstack-helm/ironic --namespace=openstack --values=/srv/k8s-helm/values/sa-ironic.yaml --set pod.replicas.server=1
 
+echo "export OS_TOKEN=fake-token" >> /root/.bashrc
+echo "export OS_URL=http://ironic.openstack.svc.cluster.local:80" >> /root/.bashrc

@@ -40,7 +40,7 @@
       <address type='pci' domain='0x0000' bus='0x01' slot='0x02'  function='0x0'/>
     </interface>
     <serial type='file'>
-      <source path="/var/log/ironic-bm-logs/bmt01-n0_console.log"/>
+      <source path="/var/log/libvirt-bmt01-n0_console.log"/>
       <target port='0'/>
     </serial>
     <serial type='pty'>
