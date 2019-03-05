@@ -16,4 +16,4 @@ if [ ! -f ${CONF_FILE} ]; then
     cp /srv/k8s-helm/virtual-bmc/ironic-dnsmasq.conf ${CONF_FILE}
 fi
 
-dnsmasq --conf-file=${CONF_FILE} --log-dhcp -d
+dnsmasq --conf-file=${CONF_FILE} --log-dhcp
