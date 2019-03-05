@@ -36,5 +36,9 @@ openstack baremetal node set ${NODE_UUID} \
 
 openstack baremetal node validate ${NODE_UUID}
 
-openstack baremetal node deploy ${NODE_UUID}
+openstack baremetal node manage ${NODE_UUID} --os-baremetal-api-version=1.31
+
+openstack baremetal node provide ${NODE_UUID} --os-baremetal-api-version=1.31
+
+openstack baremetal node deploy ${NODE_UUID} --os-baremetal-api-version=1.31
 

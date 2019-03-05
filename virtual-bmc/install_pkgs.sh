@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xv
 
 echo "deb [arch=amd64] http://mirror.mirantis.com/testing//openstack-pike//xenial xenial main" >> /etc/apt/sources.list
 curl http://mirror.mirantis.com/testing//openstack-pike/xenial/archive-pike.key | apt-key add -
