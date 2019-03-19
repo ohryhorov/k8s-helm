@@ -7,7 +7,7 @@ git clone https://git.openstack.org/openstack/openstack-helm-infra.git
 git clone https://git.openstack.org/openstack/openstack-helm.git
 
 apt install build-essential -y
-cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-helm refs/changes/15/636715/4 && git checkout FETCH_HEAD
+cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-helm refs/changes/15/636715/6 && git checkout FETCH_HEAD
 
 ./tools/deployment/developer/common/010-deploy-k8s.sh
 
