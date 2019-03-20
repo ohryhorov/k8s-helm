@@ -88,7 +88,7 @@ conf:
 
 network:
   pxe:
-    device: ens3
+    device: br-simulator
 #    neutron_network_name: baremetal
 #    neutron_subnet_name: baremetal
 #    neutron_provider_network: ironic
