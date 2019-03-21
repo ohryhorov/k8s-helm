@@ -6,6 +6,7 @@ cd /usr/src
 git clone https://git.openstack.org/openstack/openstack-helm-infra.git
 cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/openstack-helm-infra refs/changes/97/644897/2 && git checkout FETCH_HEAD
 
+cd /usr/src
 git clone https://git.openstack.org/openstack/openstack-helm.git
 
 apt install build-essential -y
