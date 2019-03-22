@@ -4,13 +4,13 @@ set -xe
 cd /usr/src
 
 git clone https://git.openstack.org/openstack/openstack-helm-infra.git
-cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/openstack-helm-infra refs/changes/97/644897/3 && git checkout FETCH_HEAD
+cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/openstack-helm-infra refs/changes/97/644897/4 && git checkout FETCH_HEAD
 
 cd /usr/src
 git clone https://git.openstack.org/openstack/openstack-helm.git
 
 apt install build-essential -y
-cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-helm refs/changes/15/636715/7 && git checkout FETCH_HEAD
+cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-helm refs/changes/15/636715/8 && git checkout FETCH_HEAD
 
 ./tools/deployment/developer/common/010-deploy-k8s.sh
 
@@ -28,7 +28,7 @@ cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-h
 
 #./tools/deployment/developer/nfs/080-keystone.sh
 
-make all && helm upgrade --install ironic /usr/src/openstack-helm/ironic --namespace=openstack --values=/srv/k8s-helm/values/sa-ironic.yaml --set pod.replicas.server=1
+make all && helm upgrade --install ironic /usr/src/openstack-helm/ironic --namespace=openstack --values=/usr/src/openstack-helm/tools/overrides/deployment/baremetal/ironic-standalone.yaml --set pod.replicas.server=1
 
 echo "export OS_TOKEN=fake-token" >> /root/.bashrc
 echo "export OS_URL=http://ironic.openstack.svc.cluster.local:80" >> /root/.bashrc
