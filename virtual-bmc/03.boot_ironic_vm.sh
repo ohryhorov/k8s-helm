@@ -10,10 +10,10 @@ vbmc add bmt01-n0 --port 6200
 vbmc start bmt01-n0
 vbmc show bmt01-n0
 
-br-simulator_ip="$(ip a | awk -v prefix="^    inet 192.168.90" '$0 ~ prefix {split($2, a, "/"); print a[1]}' | head -1)"
+simulator_ip="$(ip a | awk -v prefix="^    inet 192.168.90" '$0 ~ prefix {split($2, a, "/"); print a[1]}' | head -1)"
 
 NODE_UUID=`openstack baremetal node create --driver ipmi \
-    --driver-info ipmi_address=${br-simulator_ip} \
+    --driver-info ipmi_address=${simulator_ip} \
     --driver-info ipmi_port=6200 \
     --driver-info ipmi_username=admin \
     --driver-info ipmi_password=password \
