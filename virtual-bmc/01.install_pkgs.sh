@@ -5,9 +5,7 @@ curl http://mirror.mirantis.com/testing//openstack-pike/xenial/archive-pike.key 
 
 apt update
 
-apt install -y qemu qemu-kvm python-pip openvswitch-switch python-libvirt libvirt-bin pkg-config python-ironicclient
-
-pip install virtualbmc
+apt install -y qemu qemu-kvm python-pip openvswitch-switch python-libvirt libvirt-bin pkg-config python-ironicclient python-virtualbmc
 
 #disable libvirt networking
 virsh net-list && virsh net-destroy default && virsh net-autostart --network default --disable

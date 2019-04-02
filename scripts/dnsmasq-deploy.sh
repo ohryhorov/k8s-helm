@@ -21,4 +21,5 @@ set -xe
 make -C ${OSH_INFRA_PATH} dnsmasq
 
 helm upgrade --install dnsmasq ${OSH_INFRA_PATH}/dnsmasq \
-    --namespace=openstack
+    --namespace=openstack \
+    --set images.tags.dnsmasq=docker-dev-local.docker.mirantis.net/review/dnsmasq-38349:2
