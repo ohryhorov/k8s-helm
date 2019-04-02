@@ -4,13 +4,13 @@ set -xe
 cd /usr/src
 
 git clone https://git.openstack.org/openstack/openstack-helm-infra.git
-cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/openstack-helm-infra refs/changes/97/644897/4 && git checkout FETCH_HEAD
+cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/openstack-helm-infra refs/changes/97/644897/6 && git checkout FETCH_HEAD
 
 cd /usr/src
 git clone https://git.openstack.org/openstack/openstack-helm.git
 
 apt install build-essential -y
-cd ./openstack-helm && git fetch https://git.openstack.org/openstack/openstack-helm refs/changes/15/636715/8 && git checkout FETCH_HEAD
+cd ./openstack-helm
 
 ./tools/deployment/developer/common/010-deploy-k8s.sh
 

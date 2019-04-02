@@ -8,6 +8,8 @@ cd ${REPO_DIR}
 SCRIPTS_DIR="${REPO_DIR}/scripts"
 export HOME=/root/
 
+echo "172.16.246.119 docker-dev-local.docker.mirantis.net" >> /etc/hosts
+
 chmod +x ${SCRIPTS_DIR}/* -R
 
 ${SCRIPTS_DIR}/0.install_k8s_prereq.sh
