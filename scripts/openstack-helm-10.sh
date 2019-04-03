@@ -1,6 +1,9 @@
 #!/bin/bash
 set -xe
 
+export OS_TOKEN=fake-token
+export OS_URL=http://ironic.openstack.svc.cluster.local:80
+
 cd /usr/src
 
 git clone https://git.openstack.org/openstack/openstack-helm-infra.git
