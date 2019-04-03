@@ -7,7 +7,7 @@ export OS_URL=http://ironic.openstack.svc.cluster.local:80
 cd /usr/src
 
 git clone https://git.openstack.org/openstack/openstack-helm-infra.git
-cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/openstack-helm-infra refs/changes/97/644897/6 && git checkout FETCH_HEAD
+cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/openstack-helm-infra refs/changes/97/644897/8 && git checkout FETCH_HEAD
 
 cd /usr/src
 git clone https://git.openstack.org/openstack/openstack-helm.git
