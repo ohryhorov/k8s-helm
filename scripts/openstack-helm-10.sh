@@ -28,6 +28,10 @@ cd ./openstack-helm
 
 #./tools/deployment/developer/nfs/080-keystone.sh
 
+/srv/k8s-helm/virtual-bmc/01.install_pkgs.sh
+
+/srv/k8s-helm/virtual-bmc/02.vsctl.sh
+
 make all && helm upgrade --install ironic /usr/src/openstack-helm/ironic --namespace=openstack --values=/usr/src/openstack-helm/tools/overrides/deployment/baremetal/ironic-standalone.yaml --set pod.replicas.server=1
 
 echo "export OS_TOKEN=fake-token" >> /root/.bashrc
