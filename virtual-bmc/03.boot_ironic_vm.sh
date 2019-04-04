@@ -1,5 +1,8 @@
 #!/bin/bash -xv
 
+export OS_TOKEN=fake-token
+export OS_URL=http://ironic.openstack.svc.cluster.local:80
+
 virsh vol-create-as default bmt01-n0.qcow2 --capacity 10G --format qcow2
 
 virsh pool-info default

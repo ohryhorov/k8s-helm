@@ -8,7 +8,7 @@ cd ${REPO_DIR}
 SCRIPTS_DIR="${REPO_DIR}/scripts"
 export HOME=/root/
 
-echo "172.16.246.119 docker-dev-local.docker.mirantis.net" >> /etc/hosts
+echo "172.16.246.119 docker-dev-local.docker.mirantis.net docker-prod-local.docker.mirantis.net" >> /etc/hosts
 
 chmod +x ${SCRIPTS_DIR}/* -R
 

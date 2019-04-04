@@ -39,3 +39,5 @@ make all && helm upgrade --install ironic /usr/src/openstack-helm/ironic --names
 
 echo "export OS_TOKEN=fake-token" >> /root/.bashrc
 echo "export OS_URL=http://ironic.openstack.svc.cluster.local:80" >> /root/.bashrc
+
+/srv/k8s-helm/scripts/dnsmasq-deploy.sh
