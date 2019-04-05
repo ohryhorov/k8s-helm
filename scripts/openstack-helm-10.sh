@@ -12,7 +12,7 @@ cd ./openstack-helm-infra && git fetch https://git.openstack.org/openstack/opens
 cd /usr/src
 git clone https://git.openstack.org/openstack/openstack-helm.git
 
-apt install build-essential -y
+apt install build-essential jq -y
 cd ./openstack-helm
 
 ./tools/deployment/developer/common/010-deploy-k8s.sh

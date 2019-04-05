@@ -1,19 +1,11 @@
 #!/bin/bash -xv
 
-#TEMPLATE_DIR=${REPO_DIR}/templates
-
-date
-
 kubeadm init --pod-network-cidr=10.20.0.0/16
-
-date
 
 mkdir -p /root/.kube
 cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
 kubectl get pods --all-namespaces --kubeconfig /root/.kube/config
-
-date
 
 kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml --kubeconfig /root/.kube/config
 
@@ -28,6 +20,10 @@ wget https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar
 
 kubectl create serviceaccount -n kube-system tiller --kubeconfig /root/.kube/config
 kubectl create clusterrolebinding tiller-binding --clusterrole=cluster-admin --serviceaccount kube-system:tiller --kubeconfig /root/.kube/config
+
 helm init --service-account tiller
+helm serve &
+helm repo remove local
+helm repo add local http://localhost:8879/charts
 
 kubectl get pods --all-namespaces
