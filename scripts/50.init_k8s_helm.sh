@@ -1,5 +1,7 @@
 #!/bin/bash -xv
 
+swapoff -a
+
 kubeadm init --pod-network-cidr=10.20.0.0/16
 
 mkdir -p /root/.kube

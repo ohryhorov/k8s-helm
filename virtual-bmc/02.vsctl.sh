@@ -1,12 +1,13 @@
 #!/bin/bash -xv
 
-ens4_ip="$(ip a | awk -v prefix="^    inet 192.168.90" '$0 ~ prefix {split($2, a, "/"); print a[1]}' | head -1)"
-ens4_network="$(ip a | awk -v prefix="^    inet 192.168.90" '$0 ~ prefix {split($2, a, "/"); print a[2]}'| head -1)"
+baremetal_ip="$(ip a | awk -v prefix="^    inet 192.168.90" '$0 ~ prefix {split($2, a, "/"); print a[1]}' | head -1)"
+baremetal_network="$(ip a | awk -v prefix="^    inet 192.168.90" '$0 ~ prefix {split($2, a, "/"); print a[2]}'| head -1)"
+baremetal_iface="$(ip a | awk -v prefix="^    inet 192.168.90" '$0 ~ prefix {split($7, a, "/"); print a[1]}'| head -1)"
 
 ovs-vsctl add-br br-simulator
 
-ip ad del ${ens4_ip}/${ens4_network} dev ens4
-ip ad add ${ens4_ip}/${ens4_network} dev br-simulator
+ip ad del ${baremetal_ip}/${baremetal_network} dev ${baremetal_iface}
+ip ad add ${baremetal_ip}/${baremetal_network} dev br-simulator
 
 ip tuntap add dev tap-bmt01-n0i1 mode tap; ip link set dev tap-bmt01-n0i1 up
 ip tuntap add dev tap-bmt01-n0i2 mode tap; ip link set dev tap-bmt01-n0i2 up
